@@ -1,6 +1,6 @@
 module  id(
     input   wire    [31:0]  inst_i,
-    input   wire    [31:0]  rom_inst_addr_i,
+    input   wire    [31:0]  inst_addr_i,
     
     input   wire    [31:0]  rs1_data_i,
     input   wire    [31:0]  rs2_data_i,
@@ -35,7 +35,7 @@ assign imm      = inst_i[31:20];
 
 always@(*) begin
     inst_o = inst_i;
-    inst_addr_o = rom_inst_addr_i;
+    inst_addr_o = inst_addr_i;
 
     case(opcode)
         7'b0010011:begin
