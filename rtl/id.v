@@ -100,6 +100,7 @@ always@(*) begin
                     rd_addr_o   = 5'b0;
                     reg_wen     = 1'b0;
                 end 
+            endcase
         end 
         `INST_JAL:begin
             rs1_addr_o  = 5'b0;

@@ -4,10 +4,12 @@ module  PipeReg #(
 (
     input   wire                    clk,
     input   wire                    rst,
-    input   wire    [DataWidth-1:0] default_data,
-    input   wire    [DataWidth-1:0] data_i,
+    
     input   wire                    hold_flag_i,
     
+    input   wire    [DataWidth-1:0] default_data,
+    input   wire    [DataWidth-1:0] data_i,
+
     output  reg     [DataWidth-1:0]  data_o//注意时序逻辑赋值要为reg型
 );
 
@@ -21,4 +23,4 @@ end
 endmodule
 
 //DFF函数例化模板
-//PipeReg #(32)  dff1(clk,rst,default_data,data_i,data_o);
+//PipeReg #(32)  dff1(clk,rst,hold_flag_i,default_data,data_i,data_o);

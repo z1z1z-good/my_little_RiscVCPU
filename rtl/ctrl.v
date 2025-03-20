@@ -5,7 +5,7 @@ module  ctrl(
     
     output  reg     [31:0]  jump_addr_o,
     output  reg             jump_en_o,
-    output  reg             hold_flag_o,
+    output  reg             hold_flag_o
 );
 
 always@(*) begin
@@ -17,5 +17,5 @@ always@(*) begin
     else begin
     hold_flag_o = 1'b0;
     end
-    
+end
 endmodule
