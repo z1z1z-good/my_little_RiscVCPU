@@ -1,3 +1,4 @@
+`include "defines.v"
 module  id_ex(
     input   wire    clk,
     input   wire    rst,
@@ -22,7 +23,7 @@ module  id_ex(
     output  wire            reg_wen_o
 );
 
-PipeReg #(32)  dff1(clk,rst,hold_flag_i,32'h00000013,inst_i,inst_o);
+PipeReg #(32)  dff1(clk,rst,hold_flag_i,`INST_NOP,inst_i,inst_o);
 PipeReg #(32)  dff2(clk,rst,hold_flag_i,32'b0,inst_addr_i,inst_addr_o);
 
 PipeReg #(32)  dff3(clk,rst,hold_flag_i,32'b0,op_num1_i,op_num1_o);

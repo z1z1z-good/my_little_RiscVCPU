@@ -7,7 +7,7 @@ module  rom(
  reg [31:0]  rom_mem [0:4095];
 
     initial begin
-    $readmemh("ADD",rom_mem);
+    $readmemh("D:/FPGA/my_prj/my_little_RiscVCPU/inst_txt/rv32ui-p-sra.txt",rom_mem);
     end
 
 always@(*)  begin
