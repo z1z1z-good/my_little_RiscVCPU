@@ -18,13 +18,15 @@ module  id(
     output  reg     [31:0]  op_num1_o,
     output  reg     [31:0]  op_num2_o,
     output  reg     [4:0]   rd_addr_o,
-    output  reg             reg_wen
+    output  reg             reg_wen,
+    output  reg     [31:0]  base_addr_o,
+    output  reg     [31:0]  addr_offset_o
 );
 
 wire[6:0] opcode;
 wire[4:0] rd;
 wire[2:0] func3;
-wire[6:0] func7;
+//wire[6:0] func7;
 wire[4:0] rs1;
 wire[4:0] rs2;
 wire[11:0]imm;
@@ -33,16 +35,19 @@ wire[4:0] shamt;
 assign opcode   = inst_i[6:0];
 assign rd       = inst_i[11:7];
 assign func3    = inst_i[14:12];
-assign func7    = inst_i[31:25];
+//assign func7    = inst_i[31:25];
 assign rs1      = inst_i[19:15];
 assign rs2      = inst_i[24:20];
 assign imm      = inst_i[31:20];
 assign shamt    = inst_i[24:20];
 
 always@(*) begin
-    inst_o = inst_i;
-    inst_addr_o = inst_addr_i;
-
+    inst_o          =   inst_i;
+    inst_addr_o     =   inst_addr_i;
+    rs1_addr_o      = 5'b0;
+    rs2_addr_o      = 5'b0;
+    base_addr_o     =   32'b0;
+    addr_offset_o   =   32'b0;
     case(opcode)
         `INST_TYPE_I:begin
             case(func3)
@@ -63,8 +68,6 @@ always@(*) begin
                     reg_wen     = 1'b1;
                 end 
                 default:begin
-                    rs1_addr_o  = 5'b0;
-                    rs2_addr_o  = 5'b0;
                     op_num1_o   = 32'b0;
                     op_num2_o   = 32'b0;
                     rd_addr_o   = 5'b0;
@@ -74,7 +77,7 @@ always@(*) begin
         end 
         `INST_TYPE_R_M:begin
             case(func3)
-                `INST_ADD_SUB,`INST_SLL,`INST_SLT,`INST_SLTU,`INST_XOR,`INST_SRL_SRA,`INST_OR,`INST_AND:begin
+                `INST_ADD_SUB,`INST_SLT,`INST_SLTU,`INST_XOR,`INST_OR,`INST_AND:begin
                     rs1_addr_o  = rs1;
                     rs2_addr_o  = rs2;
                     op_num1_o   = rs1_data_i;
@@ -82,9 +85,15 @@ always@(*) begin
                     rd_addr_o   = rd;
                     reg_wen     = 1'b1;
                 end 
+                `INST_SLL,`INST_SRL_SRA:begin
+                    rs1_addr_o  = rs1;
+                    rs2_addr_o  = rs2;
+                    op_num1_o   = rs1_data_i;
+                    op_num2_o   = {27'b0,rs2_data_i[4:0]};
+                    rd_addr_o   = rd;
+                    reg_wen     = 1'b1;
+                end 
                 default:begin
-                    rs1_addr_o  = 5'b0;
-                    rs2_addr_o  = 5'b0;
                     op_num1_o   = 32'b0;
                     op_num2_o   = 32'b0;
                     rd_addr_o   = 5'b0;
@@ -94,47 +103,61 @@ always@(*) begin
         end
         `INST_TYPE_B:begin
             case(func3)
-                `INST_BEQ,`INST_BNE:begin
-                    rs1_addr_o  = rs1;
-                    rs2_addr_o  = rs2;
-                    op_num1_o   = rs1_data_i;
-                    op_num2_o   = rs2_data_i;
-                    rd_addr_o   = rd;
-                    reg_wen     = 1'b1;
+                `INST_BEQ,`INST_BNE,`INST_BLT,`INST_BGE,`INST_BLTU,`INST_BGEU:begin
+                    rs1_addr_o      = rs1;
+                    rs2_addr_o      = rs2;
+                    op_num1_o       = rs1_data_i;
+                    op_num2_o       = rs2_data_i;
+                    rd_addr_o       = rd;
+                    reg_wen         = 1'b1;
+                    base_addr_o     = inst_addr_i;
+                    addr_offset_o   = {{19{inst_i[31]}},inst_i[31],inst_i[7],inst_i[30:25],inst_i[11:8],1'b0};
                 end 
                 default:begin
-                    rs1_addr_o  = 5'b0;
-                    rs2_addr_o  = 5'b0;
-                    op_num1_o   = 32'b0;
-                    op_num2_o   = 32'b0;
-                    rd_addr_o   = 5'b0;
-                    reg_wen     = 1'b0;
+                    op_num1_o       = 32'b0;
+                    op_num2_o       = 32'b0;
+                    rd_addr_o       = 5'b0;
+                    reg_wen         = 1'b0;
                 end 
             endcase
         end 
         `INST_JAL:begin
-            rs1_addr_o  = 5'b0;
-            rs2_addr_o  = 5'b0;
-            op_num1_o   = {{12{inst_i[31]}}, inst_i[19:12], inst_i[20], inst_i[30:21], 1'b0};
-            op_num2_o   = 32'b0;
-            rd_addr_o   = rd;
-            reg_wen     = 1'b1;
+            rs1_addr_o      = 5'b0;
+            rs2_addr_o      = 5'b0;
+            op_num1_o       = inst_addr_i;
+            op_num2_o       = 32'h4;
+            rd_addr_o       = rd;
+            reg_wen         = 1'b1;
+            base_addr_o     = inst_addr_i;
+            addr_offset_o   = {{12{inst_i[31]}}, inst_i[19:12], inst_i[20], inst_i[30:21], 1'b0};
         end 
         `INST_LUI:begin
-            rs1_addr_o  = 5'b0;
-            rs2_addr_o  = 5'b0;
             op_num1_o   = {inst_i[31:12],12'b0};
             op_num2_o   = 32'b0;
             rd_addr_o   = rd;
             reg_wen     = 1'b1;
         end 
+        `INST_JALR:begin
+            rs1_addr_o      = rs1;
+            rs2_addr_o      = 5'b0;
+            op_num1_o       = rs1_data_i;
+            op_num2_o       = 32'h4;
+            rd_addr_o       = rd;
+            reg_wen         = 1'b1;
+            base_addr_o     = inst_addr_i;
+            addr_offset_o   = {{20{imm[11]}},imm};
+        end 
+        `INST_AUIPC:begin
+            op_num1_o   = inst_addr_i;
+            op_num2_o   = {inst_i[31:12],12'b0};
+            rd_addr_o   = rd;
+            reg_wen     = 1'b1;
+        end 
         default:begin
-            rs1_addr_o  = 5'b0;
-            rs2_addr_o  = 5'b0;
-            op_num1_o   = 32'b0;
-            op_num2_o   = 32'b0;
-            rd_addr_o   = 5'b0;
-            reg_wen     = 1'b0;
+            op_num1_o       = 32'b0;
+            op_num2_o       = 32'b0;
+            rd_addr_o       = 5'b0;
+            reg_wen         = 1'b0;
         end 
     endcase
 end 
