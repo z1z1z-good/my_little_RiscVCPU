@@ -10,6 +10,10 @@ module tb;
     
     always #10 clk = ~clk;
     
+initial begin
+    $readmemh("D:/FPGA/my_prj/my_little_RiscVCPU/inst_txt/rv32ui-p-sh.txt",tb.riscv_soc_inst.rom_inst.rom_32bit.dual_ram_template_isnt.memory);
+end
+    
     initial begin
         clk <= 1'b1;
         rst <= 1'b0;
