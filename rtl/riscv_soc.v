@@ -1,8 +1,13 @@
 module riscv_soc(
-    input  wire           clk,
-    input  wire           rst
+    input  wire         clk,
+    input  wire         rst,
+    
+    input  wire         wen,
+    input  wire         ren,
+    input  wire [31:0]  w_addr_i,
+    input  wire [31:0]  w_data_i,
+    output  wire        riscv_mem_wr_req_o
 );
-
 
 //riscv to rom 
 wire    [31:0]  riscv_inst_addr_o;
@@ -16,10 +21,12 @@ wire    [31:0]  riscv_mem_wr_addr_o;
 wire    [31:0]  riscv_mem_wr_data_o;
 wire    [3:0]   riscv_mem_wr_sel_o;
 wire            riscv_mem_rd_req_o;
-wire            riscv_mem_wr_req_o;
+
 
 //ram to riscv 
 wire    [31:0]  ram_data_o;
+
+
 
 
 riscv riscv_inst(
@@ -43,11 +50,11 @@ rom rom_inst(
     .clk        (clk),
     .rst        (rst),
 
-    .wen        (1'b0),
-    .w_addr_i   (32'b0),
-    .w_data_i   (32'b0),
+    .wen        (wen),
+    .w_addr_i   (w_addr_i),
+    .w_data_i   (w_data_i),
 
-    .ren        (1'b1),
+    .ren        (ren),
     .r_addr_i   (riscv_inst_addr_o),
     .r_data_o   (rom_inst_o)
 );
