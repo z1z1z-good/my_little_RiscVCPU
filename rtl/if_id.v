@@ -23,7 +23,7 @@ end
 
 assign inst_o = rom_flag ? inst_i : `INST_NOP;
 
-//经过rom读指令已经让指令数据打了一拍了
+//经过rom读指令已经让指令数据打了一拍了，这里不再多打
 //PipeReg #(32)  dff2(clk,rst,hold_flag_i,`INST_NOP,inst_i,inst_o);
 PipeReg #(32)  dff1(clk,rst,hold_flag_i,32'b0,inst_addr_i,inst_addr_o);
 

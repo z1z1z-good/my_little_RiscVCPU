@@ -101,6 +101,7 @@ endmodule
     // .w_data_i   (w_data_i),
     // .ren        (ren),
     // .r_addr_i   (r_addr),
+    
     // .r_data_o   (r_data_o)
     // ); 
 
